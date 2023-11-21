@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Allocation Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px #ddd;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .button-container button:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function calcularDivisao() {
+            var ganhoMensal = parseFloat(document.getElementById("ganhoMensal").value);
+            var totalPorcentagem = 0;
+            var errorContainer = document.getElementById("errorContainer");
+            errorContainer.innerHTML = "";
+
+            var porcentagens = ["necessidades", "poupanca", "dividas", "investimentos", "educacao", "lazer"];
+            porcentagens.forEach(function (categoria) {
+                var porcentagemInput = document.getElementById(categoria + "Porcentagem");
+                var porcentagem = parseFloat(porcentagemInput.value);
+
+                // Check for valid input
+                if (isNaN(porcentagem) || porcentagem < 0 || porcentagem > 100) {
+                    errorContainer.innerHTML = "Porcentagens devem ser valores entre 0 e 100.";
+                    return;
+                }
+
+                totalPorcentagem += porcentagem;
+            });
+
+            // Adjust percentages to ensure the total is 100%
+            if (totalPorcentagem !== 100) {
+                var remainingPercentage = 100 - totalPorcentagem;
+                var nonZeroInputs = porcentagens.filter(function (categoria) {
+                    return parseFloat(document.getElementById(categoria + "Porcentagem").value) !== 0;
+                });
+
+                // Distribute the remaining percentage evenly among non-zero inputs
+                if (nonZeroInputs.length > 0) {
+                    var adjustment = remainingPercentage / nonZeroInputs.length;
+                    nonZeroInputs.forEach(function (categoria) {
+                        var newPercentage = parseFloat(document.getElementById(categoria + "Porcentagem").value) + adjustment;
+                        document.getElementById(categoria + "Porcentagem").value = newPercentage.toFixed(2);
+                    });
+                } else {
+                    errorContainer.innerHTML = "A soma das porcentagens deve ser igual a 100.";
+                    return;
+                }
+            }
+
+            // Calculate and display values
+            porcentagens.forEach(function (categoria) {
+                var porcentagem = parseFloat(document.getElementById(categoria + "Porcentagem").value);
+                var valor = ganhoMensal * (porcentagem / 100);
+                document.getElementById(categoria + "Valor").textContent = valor.toFixed(2);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Allocation Calculator</h1>
+        <div class="form-group">
+            <label for="ganhoMensal">Monthly Income:</label>
+            <input type="number" id="ganhoMensal" min="0" step="0.01" value="0">
+        </div>
+
+        <div class="form-group">
+            <label for="necessidadesPorcentagem">Basic Needs (%):</label>
+            <input type="number" id="necessidadesPorcentagem" min="0" max="100" value="50">
+        </div>
+
+        <div class="form-group">
+            <label for="poupancaPorcentagem">Emergency Savings (%):</label>
+            <input type="number" id="poupancaPorcentagem" min="0" max="100" value="10">
+        </div>
+
+        <div class="form-group">
+            <label for="dividasPorcentagem">Debt Payment (%):</label>
+            <input type="number" id="dividasPorcentagem" min="0" max="100" value="10">
+        </div>
+
+        <div class="form-group">
+            <label for="investimentosPorcentagem">Long-Term Investments (%):</label>
+            <input type="number" id="investimentosPorcentagem" min="0" max="100" value="10">
+        </div>
+
+        <div class="form-group">
+            <label for="educacaoPorcentagem">Education & Development (%):</label>
+            <input type="number" id="educacaoPorcentagem" min="0" max="100" value="5">
+        </div>
+
+        <div class="form-group">
+            <label for="lazerPorcentagem">Leisure & Quality of Life (%):</label>
+            <input type="number" id="lazerPorcentagem" min="0" max="100" value="15">
+        </div>
+
+        <div class="button-container">
+            <button onclick="calcularDivisao()">Calculate Allocation</button>
+        </div>
+
+        <div id="errorContainer" class="error-message"></div>
+
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                <td>Basic Needs:</td>
+                <td id="necessidadesValor">0.00</td>
+            </tr>
+            <tr>
+                <td>Emergency Savings:</td>
+                <td id="poupancaValor">0.00</td>
+            </tr>
+            <tr>
+                <td>Debt Payment:</td>
+                <td id="dividasValor">0.00</td>
+            </tr>
+            <tr>
+                <td>Long-Term Investments:</td>
+                <td id="investimentosValor">0.00</td>
+            </tr>
+            <tr>
+                <td>Education & Development:</td>
+                <td id="educacaoValor">0.00</td>
+            </tr>
+            <tr>
+                <td>Leisure & Quality of Life:</td>
+                <td id="lazerValor">0.00</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
